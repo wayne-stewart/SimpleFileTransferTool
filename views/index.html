@@ -1,0 +1,97 @@
+<html>
+<head>
+    <title>Upload</title>
+    <style>
+        body {
+            background-color: #202020;
+            color: #F0F0F0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        #progress {
+            width: 100%; 
+            display:flex; 
+            justify-content: center;
+            flex-direction:column;
+            align-items:center;
+        }
+        .progress-bar {
+            width: 80%;
+            background-color: #444;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+            color: #F0F0F0;
+            position:relative;
+            padding:5px;
+            text-align:left;
+        }
+        .progress-bar-fill {
+            height: 30px;
+            background-color: #76c7c0;
+            color: #202020;
+            overflow: hidden;
+            white-space: nowrap;
+            position:absolute;
+            left:0px;
+            top:0px;
+            padding:5px;
+            text-align:left;
+        };
+    </style>
+    <script>
+        if (typeof(EventSource) !== "undefined") {
+            const source = new EventSource("/events");
+            source.onmessage = function(event) {
+                document.querySelector('#progress').innerHTML = event.data;
+            };
+            source.onerror = function(error) {
+                document.querySelector('#progress').innerHTML = "Error receiving updates.";
+            };
+        } else {
+            // Fallback for unsupported browsers
+            document.querySelector('#progress').innerHTML = "File upload progress not available.";
+        }
+
+        document.addEventListener('dragover', function(event) {
+            event.preventDefault();
+        });
+
+        document.addEventListener('drop', function(event) {
+            event.preventDefault();
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                for (let i = 0; i < files.length; i++) {
+                    uploadFile(files[i]);
+                }
+            }
+        });
+
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    console.log('File uploaded successfully!');
+                } else {
+                    console.log('File upload failed.');
+                }
+            }).catch(error => {
+                console.log('Error uploading file: ' + error.message);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Drag Files to Upload</h1>
+    <div id="progress"></div>
+</body>
+</html>
+
