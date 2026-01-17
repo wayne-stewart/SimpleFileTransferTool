@@ -51,7 +51,7 @@ func main() {
 				filename := k.(string)
 				progress := v.(FileProgress)
 				p := float64(progress.Progress) / float64(progress.Size) * 100
-				s := fmt.Sprintf("%s %.2f %s", filename, p, progress.Message)
+				s := fmt.Sprintf("%s %.2f%%", filename, p)
 				s = strings.ReplaceAll(progressHTML, "{text}", s)
 				s = strings.ReplaceAll(s, "33", fmt.Sprintf("%.0f", p))
 				data += s
@@ -104,7 +104,8 @@ func main() {
 		file_progress.Store(progress.Filename, progress)
 		buffer := make([]byte, 1024*10) // 10KB buffer
 		for {
-			//time.Sleep(100 * time.Microsecond)
+			// uncomment for slow mode
+			//time.Sleep(time.Millisecond)
 			n, err := in_file.Read(buffer)
 			if n > 0 {
 				progress.Progress += int64(n)
@@ -132,9 +133,9 @@ func main() {
 			}
 			file_progress.Store(progress.Filename, progress)
 		}
-		progress.Message = "Done"
-		progress.Done = true
-		progress.DoneTime = time.Now()
+		// progress.Message = "Done"
+		// progress.Done = true
+		// progress.DoneTime = time.Now()
 		file_progress.Store(progress.Filename, progress)
 	})
 
